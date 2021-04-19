@@ -7,3 +7,7 @@ clean:
 .PHONY: all
 all:
 	go build -o beacon-plus *.go
+
+.PHONY: calibnet
+calibnet:
+	go build -tags=calibnet -o beacon-plus *.go

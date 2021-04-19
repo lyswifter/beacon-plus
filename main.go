@@ -149,7 +149,7 @@ func saveBeacon(epoch abi.ChainEpoch, info ltypes.BeaconEntryInfo) error {
 
 func setupBeaconServer() {
 	r := gin.Default()
-	r.GET("/beacon/:epoch", func(c *gin.Context) {
+	r.GET("/public/:epoch", func(c *gin.Context) {
 		epoch := c.Param("epoch")
 
 		key := datastore.NewKey(epoch)
@@ -191,7 +191,7 @@ func setupBeaconServer() {
 		// c.String(http.StatusOK, "Finished get beacon for epoch: %s ret: %v", epoch, string(qt))
 	})
 
-	r.Run("127.0.0.1:9090") // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
+	r.Run("0.0.0.0:9090") // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
 }
 
 func OkFunc(c *gin.Context) {

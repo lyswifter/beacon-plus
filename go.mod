@@ -4,7 +4,6 @@ go 1.16
 
 require (
 	github.com/filecoin-project/go-state-types v0.1.0
-	github.com/filecoin-project/go-statestore v0.1.1-0.20210311122610-6c7a5aedbdea
 	github.com/filecoin-project/lotus v1.6.0
 	github.com/gin-gonic/gin v1.7.1
 	github.com/go-playground/validator/v10 v10.5.0 // indirect
@@ -12,7 +11,6 @@ require (
 	github.com/ipfs/go-cid v0.0.7
 	github.com/ipfs/go-datastore v0.4.5
 	github.com/ipfs/go-ds-leveldb v0.4.2
-	github.com/ipfs/go-ipld-cbor v0.0.5
 	github.com/ipfs/go-log/v2 v2.1.3
 	github.com/json-iterator/go v1.1.10 // indirect
 	github.com/leodido/go-urn v1.2.1 // indirect
