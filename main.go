@@ -9,7 +9,6 @@ import (
 	"github.com/filecoin-project/go-state-types/abi"
 	"github.com/gin-gonic/gin"
 	"github.com/ipfs/go-datastore"
-	logging "github.com/ipfs/go-log/v2"
 	"github.com/lyswifter/beacon-plus/clock"
 	ltypes "github.com/lyswifter/beacon-plus/localtype"
 	"github.com/mitchellh/go-homedir"
@@ -17,10 +16,8 @@ import (
 
 const repoPath = "~/.beaconplus"
 
-var log = logging.Logger("main")
-
 func main() {
-	fmt.Print("This is the beacon plus server\n")
+	logtime("This is the beacon plus server")
 
 	repodir, err := homedir.Expand(repoPath)
 	if err != nil {
@@ -29,19 +26,19 @@ func main() {
 
 	ldb, err := setupLevelDs(repodir, false)
 	if err != nil {
-		fmt.Printf("BeaconDB: err %s\n", err)
+		logtime("BeaconDB: err %s", err)
 		return
 	}
 	BeaconDB = ldb
-	fmt.Printf("BeaconDB: %v\n", BeaconDB)
+	logtime("BeaconDB: %v", BeaconDB)
 
 	go func() {
 		ds := BuiltinDrandConfig()
-		fmt.Printf("BuiltinDrandConfig %+v\n", ds)
+		logtime("BuiltinDrandConfig %+v", ds)
 
 		be, err := RandomSchedule(ds)
 		if err != nil {
-			fmt.Printf("RandomSchedule %s\n", err)
+			logtime("RandomSchedule %s", err)
 			return
 		}
 		BeaconSche = be
@@ -53,11 +50,11 @@ func main() {
 }
 
 func setupBeaconLoop() {
-	fmt.Print("setupBeaconLoop\n")
+	logtime("setupBeaconLoop")
 
 	for {
 		fmt.Println()
-		fmt.Print("loop again\n")
+		logtime("loop again")
 
 		pctx := context.TODO()
 
@@ -65,7 +62,7 @@ func setupBeaconLoop() {
 		curTimestamp := clock.Clock.Now().Unix()
 		baseEpoch := (curTimestamp - GenesisTimeStamp) / int64(BlockDelaySecs)
 		baseTimestamp := GenesisTimeStamp + baseEpoch*int64(BlockDelaySecs)
-		fmt.Printf("baseEpoch: %d baseTimestamp: %d\n", baseEpoch, baseTimestamp)
+		logtime("baseEpoch: %d baseTimestamp: %d", baseEpoch, baseTimestamp)
 
 		//get beacon for the round
 
@@ -74,20 +71,20 @@ func setupBeaconLoop() {
 		nextEpoch := abi.ChainEpoch(baseEpoch) + 1
 		entryNext, err := BeaconGetEntry(ctx, nextEpoch)
 		if err != nil {
-			log.Infof("BeaconGetEntry: %s", err)
+			logtime("BeaconGetEntry: %s", err)
 			continue
 		}
 
 		nextnextEpoch := abi.ChainEpoch(baseEpoch) + 2
 		entryNextNext, err := BeaconGetEntry(ctx, nextnextEpoch)
 		if err != nil {
-			log.Infof("BeaconGetEntry: %s", err)
+			logtime("BeaconGetEntry: %s", err)
 			continue
 		}
 
 		if entryNext != nil && entryNextNext != nil {
-			fmt.Printf("entry-next round: %d data: %v\n", entryNext.Round, entryNext.Data)
-			fmt.Printf("entry-next-next round: %d data: %v\n", entryNextNext.Round, entryNextNext.Data)
+			logtime("entry-next round: %d data: %v", entryNext.Round, entryNext.Data)
+			logtime("entry-next-next round: %d data: %v", entryNextNext.Round, entryNextNext.Data)
 		}
 
 		entryInfoNext := ltypes.BeaconEntryInfo{
@@ -112,7 +109,7 @@ func setupBeaconLoop() {
 
 		nullround++
 		nextRound := time.Unix(int64(baseTimestamp+int64(BlockDelaySecs)*int64(nullround)), 0)
-		log.Infof("sleep to next round: %s nullround: %d", nextRound.String(), nullround)
+		logtime("sleep to next round: %s nullround: %d", nextRound.String(), nullround)
 
 		select {
 		case <-clock.Clock.After(clock.Clock.Until(nextRound)):
@@ -124,10 +121,10 @@ func setupBeaconLoop() {
 
 func saveBeacon(epoch abi.ChainEpoch, info ltypes.BeaconEntryInfo) error {
 	key := datastore.NewKey(fmt.Sprintf("%d", epoch))
-	fmt.Printf("write key: %+v\n", key)
+	logtime("write key: %+v", key)
 	ishas, err := BeaconDB.Has(key)
 	if err != nil {
-		fmt.Printf("entrys: has %s\n", err)
+		logtime("entrys: has %s", err)
 		return err
 	}
 
@@ -139,7 +136,7 @@ func saveBeacon(epoch abi.ChainEpoch, info ltypes.BeaconEntryInfo) error {
 
 		err = BeaconDB.Put(key, in)
 		if err != nil {
-			fmt.Printf("entrys: begin %s\n", err)
+			logtime("entrys: begin %s", err)
 			return err
 		}
 	}
@@ -153,10 +150,10 @@ func setupBeaconServer() {
 		epoch := c.Param("epoch")
 
 		key := datastore.NewKey(epoch)
-		fmt.Printf("read key: %+v\n", key)
+		logtime("read key: %+v", key)
 		ishas, err := BeaconDB.Has(key)
 		if err != nil {
-			fmt.Printf("entrys: has %s\n", err)
+			logtime("entrys: has %s", err)
 			return
 		}
 
@@ -171,7 +168,7 @@ func setupBeaconServer() {
 
 		qt, err := BeaconDB.Get(key)
 		if err != nil {
-			fmt.Printf("entrys: list %s\n", err)
+			logtime("entrys: list %s", err)
 			return
 		}
 
@@ -181,7 +178,7 @@ func setupBeaconServer() {
 			return
 		}
 
-		fmt.Printf("entry read round: %d data: %+v\n", entrys.Round, entrys)
+		logtime("entry read round: %d data: %+v", entrys.Round, entrys)
 		c.JSON(200, gin.H{
 			"status":  "Ok",
 			"epoch":   epoch,
@@ -200,4 +197,8 @@ func OkFunc(c *gin.Context) {
 
 func ErrFunc(c *gin.Context) {
 
+}
+
+func logtime(format string, a ...interface{}) {
+	fmt.Printf(fmt.Sprintf("[%s]	%s\n", time.Now().Format("2006-01-02 15:04:05.999"), format), a)
 }
