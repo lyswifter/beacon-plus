@@ -62,7 +62,6 @@ func setupBeaconLoop() {
 		curTimestamp := clock.Clock.Now().Unix()
 		baseEpoch := (curTimestamp - GenesisTimeStamp) / int64(BlockDelaySecs)
 		baseTimestamp := GenesisTimeStamp + baseEpoch*int64(BlockDelaySecs)
-		logtime("baseEpoch: %d baseTimestamp: %d", baseEpoch, baseTimestamp)
 
 		//get beacon for the round
 
@@ -147,10 +146,13 @@ func saveBeacon(epoch abi.ChainEpoch, info ltypes.BeaconEntryInfo) error {
 func setupBeaconServer() {
 	r := gin.Default()
 	r.GET("/public/:epoch", func(c *gin.Context) {
+		start := time.Now()
 		epoch := c.Param("epoch")
 
+		defer logtime("read epoch: %s took: %s", epoch, time.Since(start).String())
+
 		key := datastore.NewKey(epoch)
-		logtime("read key: %+v", key)
+
 		ishas, err := BeaconDB.Has(key)
 		if err != nil {
 			logtime("entrys: has %s", err)
@@ -189,14 +191,6 @@ func setupBeaconServer() {
 	})
 
 	r.Run("0.0.0.0:9090") // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
-}
-
-func OkFunc(c *gin.Context) {
-
-}
-
-func ErrFunc(c *gin.Context) {
-
 }
 
 func logtime(format string, a ...interface{}) {
