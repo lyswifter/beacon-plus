@@ -1,4 +1,0 @@
-[submodule "extern/lotus"]
-	path = extern/lotus
-	url = https://github.com/lyswifter/ly-lotus.git
-	branch = drand-log

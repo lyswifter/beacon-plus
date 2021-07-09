@@ -40,8 +40,6 @@ func BeaconGetEntry(ctx context.Context, epoch abi.ChainEpoch) (*types.BeaconEnt
 	rr := b.MaxBeaconRoundForEpoch(epoch)
 	e := b.Entry(ctx, rr)
 
-	go b.Watch(ctx)
-
 	select {
 	case be, ok := <-e:
 		if !ok {
