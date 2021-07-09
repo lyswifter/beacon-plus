@@ -63,7 +63,7 @@ func setupBeaconLoop() {
 		baseEpoch := (curTimestamp - GenesisTimeStamp) / int64(BlockDelaySecs)
 		baseTimestamp := GenesisTimeStamp + baseEpoch*int64(BlockDelaySecs)
 
-		//get beacon for the round
+		// get beacon for the round
 
 		ctx, cancel := context.WithTimeout(pctx, time.Second*3)
 		defer cancel()
@@ -108,6 +108,7 @@ func setupBeaconLoop() {
 
 		nullround++
 		nextRound := time.Unix(int64(baseTimestamp+int64(BlockDelaySecs)*int64(nullround)), 0)
+
 		logtime("sleep to next round: %s nullround: %d", nextRound.String(), nullround)
 
 		select {
@@ -120,7 +121,6 @@ func setupBeaconLoop() {
 
 func saveBeacon(epoch abi.ChainEpoch, info ltypes.BeaconEntryInfo) error {
 	key := datastore.NewKey(fmt.Sprintf("%d", epoch))
-	logtime("write key: %+v", key)
 	ishas, err := BeaconDB.Has(key)
 	if err != nil {
 		logtime("entrys: has %s", err)
@@ -138,19 +138,19 @@ func saveBeacon(epoch abi.ChainEpoch, info ltypes.BeaconEntryInfo) error {
 			logtime("entrys: begin %s", err)
 			return err
 		}
+
+		logtime("write beacon for epoch: %s", key.String())
 	}
 
 	return nil
 }
 
 func setupBeaconServer() {
+	gin.ForceConsoleColor()
+
 	r := gin.Default()
 	r.GET("/public/:epoch", func(c *gin.Context) {
-		start := time.Now()
 		epoch := c.Param("epoch")
-
-		defer logtime("read epoch: %s took: %s", epoch, time.Since(start).String())
-
 		key := datastore.NewKey(epoch)
 
 		ishas, err := BeaconDB.Has(key)
@@ -160,7 +160,6 @@ func setupBeaconServer() {
 		}
 
 		if !ishas {
-			// c.String(http.StatusInternalServerError, "Err get beacon for epoch: %s, is not exist", epoch)
 			c.JSON(500, gin.H{
 				"status":  "Err",
 				"epoch":   epoch,
@@ -180,19 +179,19 @@ func setupBeaconServer() {
 			return
 		}
 
-		logtime("entry read round: %d data: %+v", entrys.Round, entrys)
+		logtime("beacon client: %s read round: %d data: %s", c.Request.URL.User, entrys.Round, entrys.Entry.Data)
+
 		c.JSON(200, gin.H{
 			"status":  "Ok",
 			"epoch":   epoch,
 			"message": string(qt),
 		})
-
-		// c.String(http.StatusOK, "Finished get beacon for epoch: %s ret: %v", epoch, string(qt))
 	})
 
 	r.Run("0.0.0.0:9090") // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
 }
 
 func logtime(format string, a ...interface{}) {
-	fmt.Printf(fmt.Sprintf("[%s]	%s\n", time.Now().Format("2006-01-02 15:04:05.999"), format), a)
+	fat := fmt.Sprintf("[%s]	%s\n", time.Now().Format("2006/01/02 - 15:04:05.999"), format)
+	fmt.Printf(fat, a)
 }
