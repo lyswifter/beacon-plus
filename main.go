@@ -179,7 +179,7 @@ func setupBeaconServer() {
 			return
 		}
 
-		logtime("beacon client: %s read round: %d data: %s", c.Request.URL.User, entrys.Round, entrys.Entry.Data)
+		logtime("read beacon from client: %s round: %d data: %s", c.ClientIP(), entrys.Round, entrys.Entry.Data)
 
 		c.JSON(200, gin.H{
 			"status":  "Ok",
