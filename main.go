@@ -150,6 +150,7 @@ func setupBeaconServer() {
 
 	r := gin.Default()
 	r.GET("/public/:epoch", func(c *gin.Context) {
+		start := time.Now()
 		epoch := c.Param("epoch")
 		key := datastore.NewKey(epoch)
 
@@ -179,13 +180,13 @@ func setupBeaconServer() {
 			return
 		}
 
-		logtime("read beacon from client: %s round: %d data: %s", c.ClientIP(), entrys.Round, entrys.Entry.Data)
-
 		c.JSON(200, gin.H{
 			"status":  "Ok",
 			"epoch":   epoch,
 			"message": string(qt),
 		})
+
+		logtime("Request from client: %s round: %d data: %v took: %s", c.ClientIP(), entrys.Round, entrys.Entry.Data, time.Since(start).String())
 	})
 
 	r.Run("0.0.0.0:9090") // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
