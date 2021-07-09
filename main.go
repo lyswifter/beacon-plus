@@ -146,8 +146,6 @@ func saveBeacon(epoch abi.ChainEpoch, info ltypes.BeaconEntryInfo) error {
 }
 
 func setupBeaconServer() {
-	gin.ForceConsoleColor()
-
 	r := gin.Default()
 	r.GET("/public/:epoch", func(c *gin.Context) {
 		start := time.Now()
