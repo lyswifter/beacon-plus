@@ -5,10 +5,10 @@ import (
 	"fmt"
 
 	"github.com/filecoin-project/go-state-types/abi"
-	"github.com/filecoin-project/lotus/chain/beacon"
-	"github.com/filecoin-project/lotus/chain/beacon/drand"
 	"github.com/filecoin-project/lotus/chain/types"
 	"github.com/filecoin-project/lotus/node/modules/dtypes"
+	beacon "github.com/lyswifter/beacon-plus/beacon"
+	drand "github.com/lyswifter/beacon-plus/beacon/drand"
 	"golang.org/x/xerrors"
 )
 

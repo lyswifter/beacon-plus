@@ -11,13 +11,14 @@ import (
 	"github.com/ipfs/go-datastore"
 	"github.com/lyswifter/beacon-plus/clock"
 	ltypes "github.com/lyswifter/beacon-plus/localtype"
+	"github.com/lyswifter/beacon-plus/log"
 	"github.com/mitchellh/go-homedir"
 )
 
 const repoPath = "~/.beaconplus"
 
 func main() {
-	logtime("This is the beacon plus server")
+	log.Infof("This is the beacon plus server")
 
 	repodir, err := homedir.Expand(repoPath)
 	if err != nil {
@@ -26,19 +27,19 @@ func main() {
 
 	ldb, err := setupLevelDs(repodir, false)
 	if err != nil {
-		logtime("BeaconDB: err %s", err)
+		log.Infof("BeaconDB: err %s", err)
 		return
 	}
 	BeaconDB = ldb
-	logtime("BeaconDB: %v", BeaconDB)
+	log.Infof("BeaconDB: %v", BeaconDB)
 
 	go func() {
 		ds := BuiltinDrandConfig()
-		logtime("BuiltinDrandConfig %+v", ds)
+		log.Infof("BuiltinDrandConfig %+v", ds)
 
 		be, err := RandomSchedule(ds)
 		if err != nil {
-			logtime("RandomSchedule %s", err)
+			log.Infof("RandomSchedule %s", err)
 			return
 		}
 		BeaconSche = be
@@ -50,11 +51,11 @@ func main() {
 }
 
 func setupBeaconLoop() {
-	logtime("setupBeaconLoop")
+	log.Infof("SetupBeaconLoop")
 
 	for {
 		fmt.Println()
-		logtime("loop again")
+		log.Infof("loop again")
 
 		pctx := context.TODO()
 
@@ -70,20 +71,20 @@ func setupBeaconLoop() {
 		nextEpoch := abi.ChainEpoch(baseEpoch) + 1
 		entryNext, err := BeaconGetEntry(ctx, nextEpoch)
 		if err != nil {
-			logtime("BeaconGetEntry: %s", err)
+			log.Infof("BeaconGetEntry: %s", err)
 			continue
 		}
 
 		nextnextEpoch := abi.ChainEpoch(baseEpoch) + 2
 		entryNextNext, err := BeaconGetEntry(ctx, nextnextEpoch)
 		if err != nil {
-			logtime("BeaconGetEntry: %s", err)
+			log.Infof("BeaconGetEntry: %s", err)
 			continue
 		}
 
 		if entryNext != nil && entryNextNext != nil {
-			logtime("entry-next round: %d data: %v", entryNext.Round, entryNext.Data)
-			logtime("entry-next-next round: %d data: %v", entryNextNext.Round, entryNextNext.Data)
+			log.Infof("entry-next round: %d data: %v", entryNext.Round, entryNext.Data)
+			log.Infof("entry-next-next round: %d data: %v", entryNextNext.Round, entryNextNext.Data)
 		}
 
 		entryInfoNext := ltypes.BeaconEntryInfo{
@@ -109,7 +110,7 @@ func setupBeaconLoop() {
 		nullround++
 		nextRound := time.Unix(int64(baseTimestamp+int64(BlockDelaySecs)*int64(nullround)), 0)
 
-		logtime("sleep to next round: %s nullround: %d", nextRound.String(), nullround)
+		log.Infof("sleep to next round: %s nullround: %d", nextRound.String(), nullround)
 
 		select {
 		case <-clock.Clock.After(clock.Clock.Until(nextRound)):
@@ -123,7 +124,7 @@ func saveBeacon(epoch abi.ChainEpoch, info ltypes.BeaconEntryInfo) error {
 	key := datastore.NewKey(fmt.Sprintf("%d", epoch))
 	ishas, err := BeaconDB.Has(key)
 	if err != nil {
-		logtime("entrys: has %s", err)
+		log.Infof("entrys: has %s", err)
 		return err
 	}
 
@@ -135,11 +136,11 @@ func saveBeacon(epoch abi.ChainEpoch, info ltypes.BeaconEntryInfo) error {
 
 		err = BeaconDB.Put(key, in)
 		if err != nil {
-			logtime("entrys: begin %s", err)
+			log.Infof("entrys: begin %s", err)
 			return err
 		}
 
-		logtime("write beacon for epoch: %s", key.String())
+		log.Infof("write beacon for epoch: %s", key.String())
 	}
 
 	return nil
@@ -154,7 +155,7 @@ func setupBeaconServer() {
 
 		ishas, err := BeaconDB.Has(key)
 		if err != nil {
-			logtime("entrys: has %s", err)
+			log.Infof("entrys: has %s", err)
 			return
 		}
 
@@ -168,7 +169,7 @@ func setupBeaconServer() {
 
 		qt, err := BeaconDB.Get(key)
 		if err != nil {
-			logtime("entrys: list %s", err)
+			log.Infof("entrys: list %s", err)
 			return
 		}
 
@@ -184,13 +185,8 @@ func setupBeaconServer() {
 			"message": string(qt),
 		})
 
-		logtime("Request from client: %s round: %d data: %v took: %s", c.ClientIP(), entrys.Round, entrys.Entry.Data, time.Since(start).String())
+		log.Infof("Request from client: %s round: %d data: %v took: %s", c.ClientIP(), entrys.Round, entrys.Entry.Data, time.Since(start).String())
 	})
 
 	r.Run("0.0.0.0:9090") // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
-}
-
-func logtime(format string, a ...interface{}) {
-	fat := fmt.Sprintf("[%s]		%s\n", time.Now().Format("2006-01-02 15:04:05.999"), format)
-	fmt.Printf(fat, a...)
 }
