@@ -56,6 +56,7 @@ func setupBeaconLoop() {
 	for {
 		fmt.Println()
 		log.Infof("loop again")
+		time.Sleep(10 * time.Millisecond)
 
 		pctx := context.TODO()
 
