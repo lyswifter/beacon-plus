@@ -28,6 +28,7 @@ require (
 	github.com/ugorji/go v1.2.5 // indirect
 	github.com/whyrusleeping/cbor-gen v0.0.0-20210219115102-f37d292932f2
 	go.opencensus.io v0.23.0 // indirect
+	go.uber.org/multierr v1.6.0
 	go.uber.org/zap v1.16.1-0.20210329175301-c23abee72d19
 	golang.org/x/crypto v0.0.0-20210322153248-0c34fe9e7dc2 // indirect
 	golang.org/x/lint v0.0.0-20210508222113-6edffad5e616 // indirect
