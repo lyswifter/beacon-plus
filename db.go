@@ -98,26 +98,26 @@ func saveBeacon(epoch abi.ChainEpoch, info ltypes.BeaconEntryInfo) error {
 func saveMInfo(addr string, info ltypes.MinerInfo) error {
 	key := datastore.NewKey(addr)
 
-	isHas, err := MinerInfoDB.Has(key)
+	// isHas, err := MinerInfoDB.Has(key)
+	// if err != nil {
+	// 	log.Infof("minfo: has %s", err)
+	// 	return err
+	// }
+
+	// if !isHas {
+	in, err := json.Marshal(info)
 	if err != nil {
-		log.Infof("minfo: has %s", err)
 		return err
 	}
 
-	if !isHas {
-		in, err := json.Marshal(info)
-		if err != nil {
-			return err
-		}
-
-		err = MinerInfoDB.Put(key, in)
-		if err != nil {
-			log.Infof("minfo: begin %s", err)
-			return err
-		}
-
-		log.Infof("write minfo for addr: %s val %v", key.String(), info)
+	err = MinerInfoDB.Put(key, in)
+	if err != nil {
+		log.Infof("minfo: begin %s", err)
+		return err
 	}
+
+	log.Infof("write minfo for addr: %s val %v", key.String(), info)
+	// }
 
 	return nil
 }
