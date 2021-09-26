@@ -1,4 +1,4 @@
 [submodule "extern/drand"]
 	path = extern/drand
-	url = git@github.com:lyswifter/drand.git
+	url = https://github.com/lyswifter/drand.git
 	branch = master
