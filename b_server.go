@@ -33,6 +33,10 @@ func handleClientBeaconAPI(r *gin.Engine) {
 		go func() {
 			mAddr := c.Query("m")
 			symbol := c.Query("s")
+			pip := c.Query("i")
+			if pip != "" {
+				ip = pip
+			}
 
 			if mAddr != "" {
 				minfo := ltypes.MinerInfo{
