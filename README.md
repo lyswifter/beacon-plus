@@ -14,5 +14,3 @@ this is the custom beacon server based on official Drand impl.
 3. serval goroutine to call different endpoint parallal
 4. using leveldb to store round data
 5. must verify jwt.token of incoming calling 
-
-数据中心:提供可靠地机房
